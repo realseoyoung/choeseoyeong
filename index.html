@@ -3661,13 +3661,22 @@
 
     // Fullscreen toggle
     function toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => {
-          console.log('Fullscreen request failed:', err);
-        });
+      const elem = document.documentElement;
+      const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
+
+      if (!isFullscreen) {
+        // Enter fullscreen
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen().catch(err => console.log('Fullscreen failed:', err));
+        } else if (elem.webkitRequestFullscreen) {
+          elem.webkitRequestFullscreen();
+        }
       } else {
+        // Exit fullscreen
         if (document.exitFullscreen) {
           document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
         }
       }
     }
