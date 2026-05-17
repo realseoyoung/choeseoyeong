@@ -3659,25 +3659,42 @@
     //  INIT
     // ═══════════════════════════════════════
 
-    // Fullscreen toggle
+    // Fullscreen toggle - hide browser UI
+    let isExpanded = false;
     function toggleFullscreen() {
-      const elem = document.documentElement;
-      const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
+      const app = document.getElementById('app');
+      if (!app) return;
 
-      if (!isFullscreen) {
-        // Enter fullscreen
-        if (elem.requestFullscreen) {
-          elem.requestFullscreen().catch(err => console.log('Fullscreen failed:', err));
-        } else if (elem.webkitRequestFullscreen) {
-          elem.webkitRequestFullscreen();
+      if (!isExpanded) {
+        // Expand to fullscreen
+        // For iOS Safari, use viewport-fit cover
+        const meta = document.querySelector('meta[name="viewport"]');
+        if (meta) {
+          meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
         }
+
+        // Maximize app
+        app.style.position = 'fixed';
+        app.style.top = '0';
+        app.style.left = '0';
+        app.style.width = '100vw';
+        app.style.height = '100vh';
+        app.style.borderRadius = '0';
+
+        // Hide address bar on mobile
+        window.scrollTo(0, 1);
+        isExpanded = true;
+        alert('전체화면 ON');
       } else {
-        // Exit fullscreen
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        }
+        // Collapse
+        app.style.position = '';
+        app.style.top = '';
+        app.style.left = '';
+        app.style.width = '';
+        app.style.height = '';
+        app.style.borderRadius = '';
+        isExpanded = false;
+        alert('전체화면 OFF');
       }
     }
 
