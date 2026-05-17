@@ -3691,6 +3691,7 @@
         // Check if click is outside app or on empty background
         if (!app || !app.contains(e.target) || e.target === document.body || e.target === document.documentElement) {
           console.log('Toggling fullscreen...');
+          alert('클릭 감지됨! Fullscreen 토글 중...');
           toggleFullscreen();
         }
       });
