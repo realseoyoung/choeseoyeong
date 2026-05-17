@@ -2141,6 +2141,8 @@
     
     // Cart UI - reorder2-card와 동일하게 표시
     function updateCartUI() {
+      const finalTotal = calcTotal();
+
       document.getElementById('cart-ro-name').textContent = orderState.menu;
       document.getElementById('cart-ro-en').textContent = orderState.menuEn;
       const opts = document.getElementById('cart-ro-options');
@@ -2204,15 +2206,13 @@
 
       rows.push({label:'수량',price:'1',priceValue:0});
 
-      let total = 0;
       rows.forEach(r=>{
         const row = document.createElement('div');
         row.className = 'order-opt-row';
         row.innerHTML = `<span class="order-opt-label">${r.label}</span><span class="order-opt-price">${r.price}</span>`;
         opts.appendChild(row);
-        total += r.priceValue || 0;
       });
-      const finalTotal = calcTotal();
+
       document.getElementById('cart-ro-total').textContent = formatPrice(finalTotal);
       document.getElementById('cart-sub').textContent = formatPrice(finalTotal);
       document.getElementById('cart-grand').textContent = formatPrice(finalTotal);
