@@ -3359,8 +3359,8 @@
 
       // Shots - "샷추가 한개", "샷 두개", "추가샷 하나" 등
       let shotMatched = false;
-      // "샷추가 N개" 또는 "추가샷 N개" 패턴
-      let extraShotMatch = t.match(/(추가\s*샷|샷\s*추가)\s+(하나|둘|셋|한|두|세|네|\\d+)/);
+      // "샷추가 N개" 또는 "추가샷 N개" 또는 "셔추가", "셔츠" 패턴
+      let extraShotMatch = t.match(/(추가\s*샷|샷\s*추가|추가\s*셔|셔\s*추가|셔츠)\s+(하나|둘|셋|한|두|세|네|\\d+)/);
       if(extraShotMatch) {
         let num = parseNumber(extraShotMatch[2]) || 1;
         const baseShots = orderState.size==='Venti'?4:(orderState.size==='Grande'?3:2);
@@ -3371,11 +3371,11 @@
         changed=true;
         shotMatched=true;
       }
-      // "샷 N개" 패턴 (추가 샷이 아닌 총 샷 개수)
+      // "샷 N개" 또는 "셔 N개" 패턴 (추가 샷이 아닌 총 샷 개수)
       if(!shotMatched) {
-        let totalShotMatch = t.match(/샷\s+(하나|둘|셋|한|두|세|네|\\d+)(?:개)?/);
+        let totalShotMatch = t.match(/(샷|셔)\s+(하나|둘|셋|한|두|세|네|\\d+)(?:개)?/);
         if(totalShotMatch) {
-          let num = parseNumber(totalShotMatch[1]) || 1;
+          let num = parseNumber(totalShotMatch[2]) || 1;
           orderState.shots = num;
           const baseShots = orderState.size==='Venti'?4:(orderState.size==='Grande'?3:2);
           orderState.extraShots = Math.max(0, num - baseShots);
