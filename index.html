@@ -2141,7 +2141,10 @@
     
     // Cart UI - reorder2-card와 동일하게 표시
     function updateCartUI() {
+      console.log('updateCartUI called');
+      console.log('orderState:', orderState);
       const finalTotal = calcTotal();
+      console.log('finalTotal:', finalTotal);
 
       document.getElementById('cart-ro-name').textContent = orderState.menu;
       document.getElementById('cart-ro-en').textContent = orderState.menuEn;
