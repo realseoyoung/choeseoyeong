@@ -3685,10 +3685,12 @@
       // Make app scroll-free on mobile
       document.body.style.overscrollBehavior = 'none';
 
-      // Add fullscreen toggle on background click
-      document.body.addEventListener('click', (e) => {
+      // Add fullscreen toggle on html/body click
+      document.addEventListener('click', (e) => {
         const app = document.getElementById('app');
-        if (!app || !app.contains(e.target)) {
+        // Check if click is outside app or on empty background
+        if (!app || !app.contains(e.target) || e.target === document.body || e.target === document.documentElement) {
+          console.log('Toggling fullscreen...');
           toggleFullscreen();
         }
       });
