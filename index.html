@@ -2139,40 +2139,28 @@
       }
     }
     
-    // Cart UI - reorder2-card와 동일하게 표시
+    // Cart UI - cart-order-card를 처음부터 구성
     function updateCartUI() {
-      console.log('updateCartUI called');
-      console.log('orderState:', orderState);
       const finalTotal = calcTotal();
-      console.log('finalTotal:', finalTotal);
-
-      document.getElementById('cart-ro-name').textContent = orderState.menu;
-      document.getElementById('cart-ro-en').textContent = orderState.menuEn;
-      const opts = document.getElementById('cart-ro-options');
-      opts.innerHTML = '';
 
       let basePriceWithSize = orderState.basePrice;
       if(orderState.size === 'Grande') basePriceWithSize += 600;
       else if(orderState.size === 'Venti') basePriceWithSize += 1400;
 
-      const rows = [
-        { label: getBaseLabel(), price: formatPrice(basePriceWithSize), priceValue: basePriceWithSize },
-      ];
+      let optionsHtml = `<div class="order-opt-row"><span class="order-opt-label">${getBaseLabel()}</span><span class="order-opt-price">${formatPrice(basePriceWithSize)}</span></div>`;
 
       optionDefs.forEach(opt => {
         if(opt.hidden && opt.hidden()) return;
         const val = opt.getVal();
         if(!val || val === '없음') return;
         let price = '0원';
-        let priceValue = 0;
         if(opt.id === 'size') return;
         else if(opt.id === 'bean' && (orderState.bean === 'Decaf' || orderState.bean === '1/2 Decaf')) {
-          price = formatPrice(300);
-          priceValue = 300;
+          price = '300원';
         } else if(opt.id === 'shot' || opt.id === 'extraShots') {
           if(orderState.extraShots > 0) {
             const shotPrice = orderState.extraShots * 800;
-            rows.push({label:'에스프레소샷 '+orderState.extraShots+'샷 추가',price:formatPrice(shotPrice),priceValue:shotPrice});
+            optionsHtml += `<div class="order-opt-row"><span class="order-opt-label">에스프레소샷 ${orderState.extraShots}샷 추가</span><span class="order-opt-price">${formatPrice(shotPrice)}</span></div>`;
           }
           return;
         } else if(opt.id === 'coffee' || opt.id === 'whipping' || opt.id === 'javachip' || opt.id === 'milk' || opt.id === 'frappuccinoSyrupType' || opt.id === 'ice') {
@@ -2180,43 +2168,49 @@
         } else if(opt.id === 'mokaSyrup' && orderState.mokaSyrupCount > 0) {
           price = '0원';
         } else if(opt.id === 'vanillaSyrup' && orderState.vanillaSyrupCount > 0) {
-          price = formatPrice(800);
-          priceValue = 800;
+          price = '800원';
         } else if(opt.id === 'hazelnutSyrup' && orderState.hazelnutSyrupCount > 0) {
-          price = formatPrice(800);
-          priceValue = 800;
+          price = '800원';
         } else if(opt.id === 'caramelSyrup' && orderState.caramelSyrupCount > 0) {
-          price = formatPrice(800);
-          priceValue = 800;
+          price = '800원';
         } else if(opt.id === 'syrup') {
           orderState.syrups.forEach(s => {
-            rows.push({label:s.name+' 시럽 '+s.count+'펌프',price:formatPrice(800),priceValue:800});
+            optionsHtml += `<div class="order-opt-row"><span class="order-opt-label">${s.name} 시럽 ${s.count}펌프</span><span class="order-opt-price">800원</span></div>`;
           });
           return;
         } else if(opt.id === 'caramelDrizzle' && orderState.caramelDrizzle) {
-          price = formatPrice(800);
-          priceValue = 800;
+          price = '800원';
         } else if(opt.id === 'chocolateDrizzle' && orderState.chocolateDrizzle) {
-          price = formatPrice(800);
-          priceValue = 800;
+          price = '800원';
         } else if(opt.id === 'water' || opt.id === 'temp') {
           return;
         }
         if(val && val !== '없음') {
-          rows.push({label:opt.label+' '+val, price:price, priceValue:priceValue});
+          optionsHtml += `<div class="order-opt-row"><span class="order-opt-label">${opt.label} ${val}</span><span class="order-opt-price">${price}</span></div>`;
         }
       });
 
-      rows.push({label:'수량',price:'1',priceValue:0});
+      optionsHtml += '<div class="order-opt-row"><span class="order-opt-label">수량</span><span class="order-opt-price">1</span></div>';
 
-      rows.forEach(r=>{
-        const row = document.createElement('div');
-        row.className = 'order-opt-row';
-        row.innerHTML = `<span class="order-opt-label">${r.label}</span><span class="order-opt-price">${r.price}</span>`;
-        opts.appendChild(row);
-      });
+      const cartCard = document.getElementById('cart-order-card');
+      if(cartCard) {
+        cartCard.innerHTML = `
+          <div class="order-card-inner">
+            <img class="order-drink-img" src="https://i.postimg.cc/t4t5BXzs/kape-amelikano-(ICED).jpg" alt="음료" onerror="this.style.background='#ddd'">
+            <div class="order-info">
+              <div class="order-name-block">
+                <div class="order-name">${orderState.menu}</div>
+                <div class="order-name-en">${orderState.menuEn}</div>
+              </div>
+              <div class="order-options">${optionsHtml}</div>
+              <div class="order-total-row">
+                <span class="order-total">${formatPrice(finalTotal)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
 
-      document.getElementById('cart-ro-total').textContent = formatPrice(finalTotal);
       document.getElementById('cart-sub').textContent = formatPrice(finalTotal);
       document.getElementById('cart-grand').textContent = formatPrice(finalTotal);
     }
