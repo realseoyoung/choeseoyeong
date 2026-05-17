@@ -3658,9 +3658,30 @@
     // ═══════════════════════════════════════
     //  INIT
     // ═══════════════════════════════════════
+
+    // Fullscreen toggle
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.log('Fullscreen request failed:', err);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', ()=>{
       // Make app scroll-free on mobile
       document.body.style.overscrollBehavior = 'none';
+
+      // Add fullscreen toggle on background click
+      document.body.addEventListener('click', (e) => {
+        if (e.target === document.body) {
+          toggleFullscreen();
+        }
+      });
     });
     </script>
     
