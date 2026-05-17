@@ -3678,7 +3678,8 @@
 
       // Add fullscreen toggle on background click
       document.body.addEventListener('click', (e) => {
-        if (e.target === document.body) {
+        const app = document.getElementById('app');
+        if (!app || !app.contains(e.target)) {
           toggleFullscreen();
         }
       });
