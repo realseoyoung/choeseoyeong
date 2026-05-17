@@ -2212,9 +2212,10 @@
         opts.appendChild(row);
         total += r.priceValue || 0;
       });
-      document.getElementById('cart-ro-total').textContent = formatPrice(total);
-      document.getElementById('cart-sub').textContent = formatPrice(total);
-      document.getElementById('cart-grand').textContent = formatPrice(total);
+      const finalTotal = calcTotal();
+      document.getElementById('cart-ro-total').textContent = formatPrice(finalTotal);
+      document.getElementById('cart-sub').textContent = formatPrice(finalTotal);
+      document.getElementById('cart-grand').textContent = formatPrice(finalTotal);
     }
     
     function buildOrderSummaryTTS() {
