@@ -1329,6 +1329,7 @@
         chocolateDrizzle: '', // 초콜릿 드리즐 양
         whipping: '일반',  // 휘핑 (프라푸치노용)
         javachip: '자바칩', // 자바칩 (프라푸치노용)
+        javachipCount: 0,  // 자바칩 개수 (Tall: 2, Grande: 3, Venti: 4)
         milk: '일반',      // 우유
         frappuccinoSyrupType: '일반', // 프라푸치노용시럽 (기본: 일반)
         mokaSyrupCount: 0, // 모카시럽 개수
@@ -3285,6 +3286,11 @@
       // 프라푸치노 선택 시 모카시럽 기본값 설정 (Tall=3, Grande=4, Venti=5)
       if(orderState.menu.includes('프라푸')) {
         orderState.mokaSyrupCount = orderState.size==='Tall'?3:(orderState.size==='Grande'?4:5);
+      }
+
+      // 자바 칩 프라푸치노 선택 시 자바칩 개수 기본값 설정 (Tall=2, Grande=3, Venti=4)
+      if(orderState.menu.includes('자바') && orderState.menu.includes('칩')) {
+        orderState.javachipCount = orderState.size==='Tall'?2:(orderState.size==='Grande'?3:4);
       }
     }
     
