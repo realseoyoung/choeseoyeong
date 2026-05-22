@@ -3487,7 +3487,9 @@
       if(matchWhippingKeyword(t)) {
         if(/없이|없음|빼/.test(t)) { orderState.whipping='없음'; editedOptions.add('whipping'); changedOptions.push({id:'whipping', label:'휘핑', value:'없음'}); changed=true; }
         else {
-          const amount = matchAmountKeyword(t);
+          // "마니"를 "많이"로 변환
+          let normalizedT = t.replace(/마니/g, '많이');
+          const amount = matchAmountKeyword(normalizedT);
           if(amount) { orderState.whipping=amount; editedOptions.add('whipping'); changedOptions.push({id:'whipping', label:'휘핑', value:amount}); changed=true; }
         }
       }
