@@ -2140,29 +2140,64 @@
       else if(orderState.size === 'Venti') basePriceWithSize += 1400;
 
       const rows = [
-        { label: getBaseLabel(), price: formatPrice(basePriceWithSize), priceValue: basePriceWithSize },
+        { label: getBaseLabel(), price: formatPrice(basePriceWithSize), showPrice: true, priceValue: basePriceWithSize },
       ];
 
+      // 수정된 옵션만 표시 (editedOptions)
       optionDefs.forEach(opt => {
         if(opt.hidden && opt.hidden()) return;
+
+        // size는 항상 표시 (getBaseLabel에 포함), 나머지는 editedOptions에 있는 것만 표시
+        if(opt.id !== 'size' && !editedOptions.has(opt.id)) return;
+
         const val = opt.getVal();
+
+        // whipping은 '없음'이어도 표시해야 함
+        if(opt.id === 'whipping') {
+          const whipLabel = val === '없음' ? '휘핑 없이' : `휘핑 ${val}`;
+          rows.push({label:whipLabel, price:null, showPrice:false, priceValue:0});
+          return;
+        }
+
+        // frappuccinoSyrupType 처리
+        if(opt.id === 'frappuccinoSyrupType') {
+          if(val && val !== '없음') {
+            rows.push({label:`프라푸치노용시럽 ${val}`, price:null, showPrice:false, priceValue:0});
+          }
+          return;
+        }
+
         if(!val || val === '없음') return;
-        let price = '0원';
+
+        let price = null;
         let priceValue = 0;
+        let showPrice = true;
+
         if(opt.id === 'size') return;
         else if(opt.id === 'bean' && (orderState.bean === 'Decaf' || orderState.bean === '1/2 Decaf')) {
           price = formatPrice(300);
           priceValue = 300;
-        } else if(opt.id === 'shot' || opt.id === 'extraShots') {
+        } else if(opt.id === 'shot') {
           if(orderState.extraShots > 0) {
             const shotPrice = orderState.extraShots * 800;
-            rows.push({label:'에스프레소샷 '+orderState.extraShots+'샷 추가',price:formatPrice(shotPrice),priceValue:shotPrice});
+            rows.push({label:'에스프레소샷 '+orderState.extraShots+'샷 추가',price:formatPrice(shotPrice),showPrice:true,priceValue:shotPrice});
           }
           return;
-        } else if(opt.id === 'coffee' || opt.id === 'whipping' || opt.id === 'javachip' || opt.id === 'milk' || opt.id === 'frappuccinoSyrupType' || opt.id === 'ice') {
-          price = '0원';
+        } else if(opt.id === 'bean') {
+          showPrice = false;
+        } else if(opt.id === 'milk') {
+          if(orderState.milk === '오트') {
+            price = formatPrice(800);
+            priceValue = 800;
+          } else {
+            showPrice = false;
+          }
+        } else if(opt.id === 'javachip' || opt.id === 'ice') {
+          showPrice = false;
+        } else if(opt.id === 'milkTemp' || opt.id === 'milkFoam') {
+          showPrice = false;
         } else if(opt.id === 'mokaSyrup' && orderState.mokaSyrupCount > 0) {
-          price = '0원';
+          showPrice = false;
         } else if(opt.id === 'vanillaSyrup' && orderState.vanillaSyrupCount > 0) {
           price = formatPrice(800);
           priceValue = 800;
@@ -2174,7 +2209,7 @@
           priceValue = 800;
         } else if(opt.id === 'syrup') {
           orderState.syrups.forEach(s => {
-            rows.push({label:s.name+' 시럽 '+s.count+'펌프',price:formatPrice(800),priceValue:800});
+            rows.push({label:s.name+' 시럽 '+s.count+'펌프',price:formatPrice(800),showPrice:true,priceValue:800});
           });
           return;
         } else if(opt.id === 'caramelDrizzle' && orderState.caramelDrizzle) {
@@ -2186,21 +2221,29 @@
         } else if(opt.id === 'water' || opt.id === 'temp') {
           return;
         }
+
         if(val && val !== '없음') {
-          rows.push({label:opt.label+' '+val, price:price, priceValue:priceValue});
+          rows.push({label:opt.label+' '+val, price:price, showPrice:showPrice, priceValue:priceValue});
         }
       });
 
-      rows.push({label:'수량',price:'1',priceValue:0});
+      const quantity = orderState.quantity || 1;
+      rows.push({label:'수량 '+quantity, isQuantity: true});
 
-      let total = 0;
       rows.forEach(r=>{
         const row = document.createElement('div');
         row.className = 'order-opt-row';
-        row.innerHTML = `<span class="order-opt-label">${r.label}</span><span class="order-opt-price">${r.price}</span>`;
+        if(r.isQuantity) {
+          row.innerHTML = `<span class="order-opt-label">${r.label}</span>`;
+        } else if(r.showPrice) {
+          row.innerHTML = `<span class="order-opt-label">${r.label}</span><span class="order-opt-price">${r.price}</span>`;
+        } else {
+          row.innerHTML = `<span class="order-opt-label">${r.label}</span>`;
+        }
         opts.appendChild(row);
-        total += r.priceValue || 0;
       });
+
+      const total = calcTotal();
       document.getElementById('cart-ro-total').textContent = formatPrice(total);
     }
     
