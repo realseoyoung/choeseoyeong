@@ -975,17 +975,6 @@
               </div>
             </div>
           </div>
-
-          <div style="margin-top:16px;background:#fff;border-radius:16px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-              <span style="font-size:16px;color:#737373;">소계</span>
-              <span style="font-size:16px;color:#737373;" id="cart-sub">6,800원</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;">
-              <span style="font-size:18px;font-weight:700;">합계</span>
-              <span style="font-size:18px;font-weight:700;color:#362415;" id="cart-grand">6,800원</span>
-            </div>
-          </div>
         </div>
         <div class="cart-checkout-btn" onclick="alert('결제 화면으로 이동합니다.')">
           결제하기
@@ -2213,8 +2202,6 @@
         total += r.priceValue || 0;
       });
       document.getElementById('cart-ro-total').textContent = formatPrice(total);
-      document.getElementById('cart-sub').textContent = formatPrice(total);
-      document.getElementById('cart-grand').textContent = formatPrice(total);
     }
     
     function buildOrderSummaryTTS() {
@@ -2356,8 +2343,7 @@
         apply:(v)=>{ orderState.water=v; editedOptions.add('water'); },
         hidden:()=>orderState.menu.includes('프라푸') },
       { id:'shot', label:'에스프레소샷', getVal:()=>{
-          const baseShots = orderState.size==='Tall'?2:(orderState.size==='Grande'?3:4);
-          return orderState.shots+'샷 (기본 '+baseShots+' + 추가 '+(orderState.shots-baseShots)+')';
+          return orderState.shots+'샷';
         },
         options:['1샷','2샷','3샷','4샷','5샷','6샷','7샷','8샷','9샷'],
         apply:(v)=>{
@@ -2436,8 +2422,7 @@
           const m=v.match(/(\d+)/);
           orderState.vanillaSyrupCount = m ? parseInt(m[1]) : 0;
           editedOptions.add('vanillaSyrup');
-        },
-        hidden:()=>!orderState.menu.includes('프라푸') },
+        } },
       { id:'hazelnutSyrup', label:'헤이즐넛시럽', getVal:()=>{
           if(orderState.hazelnutSyrupCount===0) return '없음';
           return orderState.hazelnutSyrupCount+'';
@@ -3216,6 +3201,10 @@
               buildOptionList();
               return;
             }
+          } else if(currentPage === 'reorder1' && !result.changed) {
+            // reorder1에서 옵션 변경 없으면 오류 메시지
+            speakTTS('잘못 들었어요. 다시 말씀해주세요.', ()=>{ startSTT(); });
+            return;
           }
           return;
         }
@@ -3356,33 +3345,31 @@
         shotBtns4.forEach(btn => { btn.classList.toggle('active', btn.textContent.startsWith(newBaseShots+'샷')); });
       }
 
-      // Shots - "샷추가 한개", "샷 두개", "추가샷 하나" 등
-      let shotMatched = false;
-      // "샷추가 N개" 또는 "추가샷 N개" 패턴
-      let extraShotMatch = t.match(/(추가\s*샷|샷\s*추가)\s+(하나|둘|셋|한|두|세|네|\\d+)/);
-      if(extraShotMatch) {
-        let num = parseNumber(extraShotMatch[2]) || 1;
-        const baseShots = orderState.size==='Venti'?4:(orderState.size==='Grande'?3:2);
-        orderState.extraShots = num;
-        orderState.shots = baseShots + num;
+      // Shots - 에스프레소/샷/샵 처리
+      // "에스프레소", "샷", "샵" 키워드 감지 후 샷 추가
+      if(/에스프레소|샷|샵/.test(t)) {
+        // 숫자 추출 (예: "샷 2개", "에스프레소 한개")
+        let numMatch = t.match(/(에스프레소|샷|샵)[^가-힣]*(하나|둘|셋|한|두|세|네|\\d+)(?:개)?/);
+        let num = 1;
+        if(numMatch && numMatch[2]) {
+          num = parseNumber(numMatch[2]) || 1;
+        }
+
+        // "추가샷", "샷추가" 등 명시적 추가 표현이 있으면 추가로 처리
+        if(/추가\s*샷|샷\s*추가|에스프레소\s*추가|추가\s*에스프레소/.test(t)) {
+          const baseShots = orderState.size==='Venti'?4:(orderState.size==='Grande'?3:2);
+          orderState.extraShots = num;
+          orderState.shots = baseShots + num;
+        } else {
+          // "샷 2개" 같은 총 샷 개수로 해석하거나, 기본 추가로 처리
+          const baseShots = orderState.size==='Venti'?4:(orderState.size==='Grande'?3:2);
+          orderState.extraShots = num;
+          orderState.shots = baseShots + num;
+        }
+
         editedOptions.add('shot');
         changedOptions.push({id:'shot', label:'에스프레소샷', value:orderState.shots+'샷'});
-        changed=true;
-        shotMatched=true;
-      }
-      // "샷 N개" 패턴 (추가 샷이 아닌 총 샷 개수)
-      if(!shotMatched) {
-        let totalShotMatch = t.match(/샷\s+(하나|둘|셋|한|두|세|네|\\d+)(?:개)?/);
-        if(totalShotMatch) {
-          let num = parseNumber(totalShotMatch[1]) || 1;
-          orderState.shots = num;
-          const baseShots = orderState.size==='Venti'?4:(orderState.size==='Grande'?3:2);
-          orderState.extraShots = Math.max(0, num - baseShots);
-          editedOptions.add('shot');
-          changedOptions.push({id:'shot', label:'에스프레소샷', value:orderState.shots+'샷'});
-          changed=true;
-          shotMatched=true;
-        }
+        changed = true;
       }
 
       // Bean - decaf/디카페인/디카프 등 감지
@@ -3648,7 +3635,55 @@
 
       return {changed, changedOptions};
     }
-    
+
+    // ═══════════════════════════════════════
+    //  FULLSCREEN TOGGLE
+    // ═══════════════════════════════════════
+    let isExpanded = false;
+    function toggleFullscreen() {
+      const app = document.getElementById('app');
+      if (!app) return;
+
+      if (!isExpanded) {
+        // Expand to fullscreen
+        // For iOS Safari, use viewport-fit cover
+        const meta = document.querySelector('meta[name="viewport"]');
+        if (meta) {
+          meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+        }
+
+        // Maximize app
+        app.style.position = 'fixed';
+        app.style.top = '0';
+        app.style.left = '0';
+        app.style.width = '100vw';
+        app.style.height = '100vh';
+        app.style.borderRadius = '0';
+
+        // Hide address bar on mobile
+        window.scrollTo(0, 1);
+        isExpanded = true;
+      } else {
+        // Collapse
+        app.style.position = '';
+        app.style.top = '';
+        app.style.left = '';
+        app.style.width = '';
+        app.style.height = '';
+        app.style.borderRadius = '';
+        isExpanded = false;
+      }
+    }
+
+    // Add fullscreen toggle on html/body click
+    document.addEventListener('click', (e) => {
+      const app = document.getElementById('app');
+      // Check if click is outside app or on empty background
+      if (!app || !app.contains(e.target) || e.target === document.body || e.target === document.documentElement) {
+        toggleFullscreen();
+      }
+    });
+
     // ═══════════════════════════════════════
     //  KEYBOARD SHORTCUT (Desktop testing)
     // ═══════════════════════════════════════
