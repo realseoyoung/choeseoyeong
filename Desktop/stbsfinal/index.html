@@ -1781,9 +1781,7 @@
       editedOptions = new Set();
       selectedRecIndex = -1;
       pageHistory = [];
-      speakTTS('안녕하세요, 듣고 있어요! 어떤 음료를 준비해드릴까요?', ()=>{
-        speakTTS('퍼스널 옵션도 한 번에 말씀하실 수 있어요', ()=>{ startSTT(); });
-      });
+      speakTTS('안녕하세요, 듣고 있어요! 어떤 음료를 준비해드릴까요? 퍼스널 옵션도 한 번에 말씀하실 수 있어요', ()=>{ startSTT(); });
       showPage('start');
     }
     
