@@ -3455,7 +3455,7 @@
         else if(/일반/.test(t)) { orderState.frappuccinoSyrupType='일반'; editedOptions.add('frappuccinoSyrupType'); changedOptions.push({id:'frappuccinoSyrupType', label:'프라푸치노용시럽', value:'일반'}); changed=true; }
       }
 
-      // Vanilla Syrup - "바닐라 시럽 한펌프", "바닐라 시럽 한개", "바닐라 시럽 하나"
+      // Vanilla Syrup - "바닐라 시럽 한펌프", "바닐라 시럽 한개", "바닐라 시럽 하나", "바닐라시럽 추가"
       if(/바닐라\s*시럽/.test(t)) {
         const vanillaMatch = t.match(/바닐라\s*시럽\s+(하나|둘|셋|한|두|세|네|\\d+)(?:개|펌프)?/);
         if(vanillaMatch) {
@@ -3468,6 +3468,12 @@
           orderState.vanillaSyrupCount = 0;
           editedOptions.add('vanillaSyrup');
           changedOptions.push({id:'vanillaSyrup', label:'바닐라시럽', value:'없음'});
+          changed = true;
+        } else if(/바닐라\s*시럽/.test(t)) {
+          // 숫자 없이 "바닐라시럽"만 있으면 기본값 1개
+          orderState.vanillaSyrupCount = 1;
+          editedOptions.add('vanillaSyrup');
+          changedOptions.push({id:'vanillaSyrup', label:'바닐라시럽', value:'1개'});
           changed = true;
         }
       }
